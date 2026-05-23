@@ -98,27 +98,52 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 		name: "read_codebase",
 		label: "Get Repo Map",
 		description:
-			"Return a high-level structural map of the codebase: functions, classes, " +
-			"methods, interfaces, structs, and more — ranked by cross-file reference " +
-			"importance so the most significant code appears first. Call this FIRST " +
-			"when entering an unfamiliar codebase or when the user asks you to explore, " +
-			"understand, or modify code. It tells you exactly which files matter and " +
-			"which symbols are entry points, replacing multiple ls/find/rg/read calls " +
-			"with a single structured overview. After making edits, call it again to " +
-			"verify the structure is intact — it returns a fresh snapshot.",
+			"Structural codebase awareness with 11 modes. Returns ranked symbols, project " +
+			"fingerprint, import hotspots, git-aware change detection, test/source pairing, " +
+			"symbol detail, file grouping, and health diagnostics. Use per the guidelines " +
+			"below — not every turn, but at every phase transition.",
 		promptSnippet:
-			"Ranked structural overview of the codebase — functions, classes, methods " +
-			"sorted by cross-file reference importance. Call FIRST when exploring any repo.",
+			"Structural codebase awareness — ranked symbols, project fingerprint, import " +
+			"hotspots, change detection, and more. Use at phase transitions, not every turn.",
 		promptGuidelines: [
-			"Use read_codebase as your FIRST action when starting work in any codebase — " +
-			"it shows the most important symbols (ranked by how many files reference them) " +
-			"so you know exactly which files to read and which symbols are entry points.",
-			"Use read_codebase after making edits to verify the codebase structure is intact " +
-			"— it returns a fresh snapshot showing your changes landed correctly and no " +
-			"symbols were orphaned.",
-			"Use read_codebase instead of chaining ls + find + rg + read for initial " +
-			"codebase exploration — one call replaces multiple exploration commands and " +
-			"shows cross-file relationships that grep cannot reveal.",
+			"WHEN TO CALL (exactly four triggers):",
+			"",
+			"1. ORIENTATION — you just entered a repo for the first time this session, " +
+			"or the user asked an open-ended question and you cannot name the top 3 " +
+			"relevant files. One call replaces 5-10 turns of ls/grep/read. " +
+			"→ Call mode=\"overview\" first (frameworks, entrypoints, next reads), " +
+			"then mode=\"map\" for structural detail.",
+			"",
+			"2. VERIFICATION — you just renamed a function, moved a class, changed an " +
+			"export, or modified a shared interface across multiple files. " +
+			"→ Call mode=\"changed\" to see git-diff files and symbol-level changes " +
+			"since the last snapshot. Confirms nothing broke and no symbols orphaned.",
+			"",
+			"3. CONTEXT SWITCH — the user said \"look at the auth module instead\" or " +
+			"switched branches/topics. Your mental map is stale. " +
+			"→ Refresh with mode=\"overview\" or mode=\"map\" as appropriate.",
+			"",
+			"4. STRUCTURAL QUESTION — the user asked \"how is this organized?\", \"what " +
+			"depends on what?\", \"where are the tests for X?\", or a symbol lookup " +
+			"without a file location. " +
+			"→ mode=\"deps\" for import hotspots and external packages " +
+			"→ mode=\"groups\" for monorepo/package layout " +
+			"→ mode=\"pairs\" for source↔test mapping " +
+			"→ mode=\"search\" for broad symbol/file matching " +
+			"→ mode=\"detail\" with query for signature + decorators + doc hints",
+			"",
+			"DO NOT CALL when:",
+			"- The user named a specific file and line number",
+			"- The task is a one-line change in a file you have already read",
+			"- You called it within the last 3 turns and the repo has not changed",
+			"- The task is purely mechanical: formatting, versions, comments, simple typos",
+			"- You are in \"execute\" mode, not \"orient\" mode — you already know where to edit",
+			"",
+			"AFTER CALLING:",
+			"- Always follow \"suggested next reads\" — they are ranked by importance",
+			"- If mode=\"changed\" reported modified symbols, inspect those files first",
+			"- If mode=\"deps\" reported high-import-count files, treat those as high-priority",
+			"- If mode=\"pairs\" returned test files for a source you are editing, run them",
 		],
 		parameters: Type.Object({
 			scope: Type.Optional(
@@ -138,7 +163,7 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 					Type.Literal("groups"),
 					Type.Literal("health"),
 				], {
-					description: "Output mode: map, overview, files, stats, search, changed, deps, pairs, detail, groups, or health",
+					description: "Mode: overview (first contact), map (structural detail), changed (after edits), deps (import structure), pairs (test mapping), search (find symbols/files), detail (inspect one symbol), groups (monorepo layout), files (inventory), stats (counts), health (tool reliability). Default: map.",
 					default: "map",
 				}),
 			),
@@ -283,9 +308,6 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 	});
 
 	pi.on("session_start", async (_event, ctx) => {
-		explorationStreak = 0;
-		nudgeDeliveredThisTurn = false;
-
 		if (!state.depsChecked) {
 			state.depsChecked = true;
 			const result = await ensureDeps(pi, ctx);
@@ -297,51 +319,5 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 				);
 			}
 		}
-	});
-
-	let explorationStreak = 0;
-	let nudgeDeliveredThisTurn = false;
-
-	pi.on("tool_call", async (event) => {
-		if (!state.enabled || nudgeDeliveredThisTurn) return;
-		if (event.toolName !== "bash") return;
-
-		const input = event.input as { command?: string } | undefined;
-		const cmd = input?.command ?? "";
-
-		if (/\b(ls|find|fd|tree|rg|grep)\b/i.test(cmd)) {
-			explorationStreak++;
-		}
-	});
-
-	pi.on("tool_execution_end", async (event) => {
-		if (!state.enabled || nudgeDeliveredThisTurn) return;
-
-		if (event.toolName === "read_codebase") {
-			explorationStreak = 0;
-			return;
-		}
-
-		if (explorationStreak >= 2) {
-			pi.sendMessage(
-				{
-					customType: "repo-baby-nudge",
-					content:
-						"You've used multiple ls/find/fd/rg exploration commands. " +
-						"Use read_codebase instead — it returns a ranked structural " +
-						"map of the entire codebase (functions, classes, methods sorted " +
-						"by cross-file reference importance) in a single call.",
-					display: true,
-				},
-				{ deliverAs: "steer" },
-			);
-			explorationStreak = 0;
-			nudgeDeliveredThisTurn = true;
-		}
-	});
-
-	pi.on("turn_start", async () => {
-		explorationStreak = 0;
-		nudgeDeliveredThisTurn = false;
 	});
 }
