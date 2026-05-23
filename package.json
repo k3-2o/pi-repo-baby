@@ -1,6 +1,6 @@
 {
   "name": "pi-repo-baby",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Repository map generator for Pi — gives the agent structural awareness of any codebase via Tree-sitter",
   "keywords": [
     "pi-package",
