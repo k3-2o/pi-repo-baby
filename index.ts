@@ -38,6 +38,16 @@ function pythonCommand(): string {
 	return existsSync(pythonBin()) ? pythonBin() : "python3";
 }
 
+async function probeTreeSitter(pi: ExtensionAPI, python: string): Promise<boolean> {
+	const probe = "import tree_sitter_language_pack; print('OK')";
+	try {
+		const { stdout, code } = await pi.exec(python, ["-c", probe], { timeout: 10_000 });
+		return code === 0 && stdout.trim() === "OK";
+	} catch {
+		return false;
+	}
+}
+
 async function ensureDeps(
 	pi: ExtensionAPI,
 	ctx?: { ui: { notify: (msg: string, type: string) => void } },
@@ -47,19 +57,12 @@ async function ensureDeps(
 		return { ok: false, detail: "repo-baby.py not found — extension may be corrupted" };
 	}
 
-	if (existsSync(pythonBin())) {
-		return { ok: true, detail: "tree-sitter-language-pack ready (cached)" };
+	if (existsSync(pythonBin()) && await probeTreeSitter(pi, pythonBin())) {
+		return { ok: true, detail: "tree-sitter-language-pack ready (cached venv)" };
 	}
 
-	const python = pythonCommand();
-	const probe = "import tree_sitter_language_pack; print('OK')";
-
-	try {
-		const { stdout, code } = await pi.exec(python, ["-c", probe], { timeout: 10_000 });
-		if (code === 0 && stdout.trim() === "OK") {
-			return { ok: true, detail: "tree-sitter-language-pack available (system)" };
-		}
-	} catch {
+	if (await probeTreeSitter(pi, "python3")) {
+		return { ok: true, detail: "tree-sitter-language-pack available (system)" };
 	}
 
 	if (ctx) ctx.ui.notify("Repo Baby: installing dependencies (this may take a minute)…", "info");
@@ -71,10 +74,9 @@ async function ensureDeps(
 			timeout: 120_000,
 		});
 
-			if (installCode === 0) {
+		if (installCode === 0) {
 			const python2 = pythonCommand();
-			const { stdout: out2, code: code2 } = await pi.exec(python2, ["-c", probe], { timeout: 10_000 });
-			if (code2 === 0 && out2.trim() === "OK") {
+			if (await probeTreeSitter(pi, python2)) {
 				if (ctx) ctx.ui.notify("✅ Repo Baby: dependencies installed — Tree-sitter active", "success");
 				return { ok: true, detail: "tree-sitter-language-pack ready" };
 			}
@@ -122,6 +124,36 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 			scope: Type.Optional(
 				Type.String({ description: "Limit to a subdirectory (e.g. 'src/')" }),
 			),
+			mode: Type.Optional(
+				Type.Union([
+					Type.Literal("map"),
+					Type.Literal("overview"),
+					Type.Literal("files"),
+					Type.Literal("stats"),
+					Type.Literal("search"),
+					Type.Literal("changed"),
+					Type.Literal("deps"),
+					Type.Literal("pairs"),
+					Type.Literal("detail"),
+					Type.Literal("groups"),
+					Type.Literal("health"),
+				], {
+					description: "Output mode: map, overview, files, stats, search, changed, deps, pairs, detail, groups, or health",
+					default: "map",
+				}),
+			),
+			format: Type.Optional(
+				Type.Union([Type.Literal("text"), Type.Literal("json")], {
+					description: "Output format (default text)",
+					default: "text",
+				}),
+			),
+			query: Type.Optional(
+				Type.String({ description: "Search/detail query when mode='search' or mode='detail'" }),
+			),
+			max_files: Type.Optional(
+				Type.Number({ description: "Maximum source files to scan (default 1000)", default: 1000 }),
+			),
 			token_budget: Type.Optional(
 				Type.Number({ description: "Max tokens for the map (default 800)", default: 800 }),
 			),
@@ -137,12 +169,36 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 				throw new Error(`repo-baby.py not found at ${script}`);
 			}
 
+			const mode = params.mode || "map";
+			const needsTreeSitter = ["map", "search", "detail"].includes(mode);
+
+			if (needsTreeSitter && (!state.depsChecked || !state.depsOk)) {
+				const result = await ensureDeps(pi, ctx);
+				state.depsChecked = true;
+				state.depsOk = result.ok;
+				if (!result.ok) {
+					throw new Error(`Repo Baby dependencies unavailable: ${result.detail}`);
+				}
+			}
+
 			const cwd = ctx.cwd;
 			const budget = params.token_budget || 800;
 
 			const args = [script, "--path", cwd, "--token-budget", String(budget)];
 			if (params.scope) {
 				args.push("--scope", params.scope);
+			}
+			if (mode) {
+				args.push("--mode", mode);
+			}
+			if (params.format) {
+				args.push("--format", params.format);
+			}
+			if (params.query) {
+				args.push("--query", params.query);
+			}
+			if (params.max_files) {
+				args.push("--max-files", String(params.max_files));
 			}
 
 			const python = pythonCommand();
@@ -235,9 +291,8 @@ export default function repoBabyExtension(pi: ExtensionAPI) {
 			const result = await ensureDeps(pi, ctx);
 			state.depsOk = result.ok;
 			if (!result.ok) {
-				state.enabled = false;
 				if (ctx) ctx.ui.notify(
-					"Repo Baby disabled — use /repo-baby doctor to retry after fixing dependencies",
+					"Repo Baby symbols unavailable — mode=files/stats still work; use /repo-baby doctor to retry",
 					"warning",
 				);
 			}

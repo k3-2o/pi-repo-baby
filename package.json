@@ -33,6 +33,6 @@
     "image": "https://raw.githubusercontent.com/k2-888/pi-repo-baby/main/screenshot.png"
   },
   "scripts": {
-    "install-deps": "[ -d venv ] || python3 -m venv venv && ./venv/bin/pip install tree-sitter-c-sharp && ./venv/bin/pip install tree-sitter-language-pack==0.13.0"
+    "install-deps": "python3 -m venv venv && ./venv/bin/python -m pip install --upgrade pip && ./venv/bin/python -m pip install tree-sitter-c-sharp tree-sitter-language-pack==0.13.0"
   }
 }

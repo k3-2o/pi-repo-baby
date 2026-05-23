@@ -18,9 +18,10 @@
 ## ✨ Highlights
 
 - **19 languages** — Python, JavaScript, TypeScript, Go, Rust, Ruby, Java, C, C++, C#, PHP, Kotlin, Swift, Scala, Bash, SQL, Lua, HCL — all via Tree-sitter, no regex
-- **Cross-file ranking** — symbols sorted by how many files reference them, so the important code surfaces first
+- **Cross-file ranking** — symbols sorted by how many files reference them, including method base-name references (`Class.method` can rank when other files call `method`)
 - **One call, not five** — replaces the `ls` → `find` → `rg` → `read` chain with a single structural map
-- **Auto-installs its own dependencies** — you clone it, it handles the rest
+- **Adaptive modes** — ranked map, overview, file inventory, repo stats, search, changed files, dependency graph, test pairs, symbol detail, groups, and health
+- **Auto-installs its own dependencies** — you clone it, and copy into your pi extensions folder and it automatically handles the rest
 - **Fresh every time** — regenerates on demand, never stale
 
 ---
@@ -52,13 +53,13 @@ Think of it as a compass: it doesn't show you the terrain, it tells you which wa
 
 `read_codebase` is built for moments where the agent doesn't know the territory. If the codebase fits in your head, you don't need it — and that's fine. But when you're operating beyond what you can hold mentally, the map pays for itself in saved exploration turns.
 
-This tool is most useful on large codebases — monorepos, legacy systems, anything beyond what `ls` can summarize. On small projects, it won't add much.
+This tool is most useful on large codebases — monorepos, legacy systems, anything beyond what `ls` can summarize — but it adapts to smaller projects too. Use `mode: "overview"` for a project fingerprint, `mode: "files"` for inventory, `mode: "stats"` for counts, `mode: "search"` / `mode: "detail"` for symbol lookup, `mode: "changed"` after edits, and `mode: "deps"` for import hotspots.
 
-**Best for:** first-time orientation in an unfamiliar codebase, monorepos where you don't know which packages matter, legacy systems with no architecture docs, figuring out what to read first without chaining `ls` → `find` → `rg`, quick architectural overview for humans — one call shows how the codebase is wired together.
+**Best for:** first-time orientation in an **unfamiliar codebase**, **monorepos** where you don't know which packages matter, **legacy systems** with no architecture docs, figuring out what to read first without chaining `ls` → `find` → `rg`, quick architectural overview for humans — one call shows how the codebase is wired together.
 
 On a real Terraform monorepo with 1,800 `.tf` files across 270 modules, `read_codebase` surfaced `aws_ssm_parameter ← 726 files` and `provider aws` at the top — in one call, you know what the entire infrastructure orbits around without reading a single file.
 
-**Skip it when:** you're in your own project and know the layout, you're making a single-file edit to a file you already read, or the repo is small enough that `ls` tells you everything. Toggle it off with `/repo-baby off` — it costs nothing to disable and nothing to bring back.
+**Skip it when:** you're making a single-file edit to a file you already read. Toggle it off with `/repo-baby off` — it costs nothing to disable and nothing to bring back.
 
 ---
 
@@ -75,6 +76,17 @@ That's it. The extension auto-installs `tree-sitter-language-pack` into its own 
 ## Usage
 
 The agent calls `read_codebase` on its own — typically as its first action when entering an unfamiliar codebase, and again after making edits to verify structure.
+
+Tool parameters:
+
+| Parameter | Effect |
+|-----------|--------|
+| `scope` | Limit analysis to a subdirectory, e.g. `src/` |
+| `token_budget` | Approximate output budget, default `800` |
+| `mode` | `map` (default), `overview`, `files`, `stats`, `search`, `changed`, `deps`, `pairs`, `detail`, `groups`, or `health` |
+| `format` | `text` (default) or `json` |
+| `query` | Search/detail text for `mode: "search"` or `mode: "detail"` |
+| `max_files` | Maximum source files to scan, default `1000` |
 
 | Command | Effect |
 |---------|--------|
@@ -116,9 +128,9 @@ All 19 languages via Tree-sitter, bundled in `tree-sitter-language-pack`.
 
 ## How It Works
 
-**File discovery** — prefers `git ls-files` (respects `.gitignore`), falls back to `os.walk`.
+**File discovery** — prefers `git ls-files` (respects `.gitignore`), falls back to `os.walk`, then prioritizes entry/config/source files before tests so caps don't hide the most useful project surface.
 
-**Symbol extraction** — each file is Tree-sitter parsed. Functions, classes, methods, interfaces, structs, traits, and impls are extracted with class/module context so methods display as `ClassName.method()`.
+**Symbol extraction** — each file is Tree-sitter parsed. Functions, async functions, JS/TS arrow-function declarations, classes, methods, interfaces, structs, traits, and impls are extracted with class/module context so methods display as `ClassName.method()`.
 
 **Ranking** — in-degree reference counting: for each symbol, counts how many other files contain its name. A single-pass tokenizer scans each file once, then set-intersection with symbol names produces reference counts. Core structural types get a boost; test files are demoted.
 
