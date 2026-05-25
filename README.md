@@ -1,12 +1,12 @@
 <p align="center">
-  <a href="https://github.com/k2-888/pi-repo-baby">
-    <img alt="Repo Baby" src="https://raw.githubusercontent.com/k2-888/pi-repo-baby/main/assets/logo.png" width="128">
+  <a href="https://github.com/k3-2o/pi-repo-baby">
+    <img alt="Repo Baby" src="https://raw.githubusercontent.com/k3-2o/pi-repo-baby/main/assets/logo.png" width="128">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/pi-repo-baby"><img alt="npm" src="https://img.shields.io/npm/v/pi-repo-baby?style=flat-square" /></a>
-  <a href="https://github.com/k2-888/pi-repo-baby/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/npm/l/pi-repo-baby?style=flat-square" /></a>
+  <a href="https://github.com/k3-2o/pi-repo-baby/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/k3-2o/pi-repo-baby?style=flat-square" /></a>
+  <a href="https://github.com/k3-2o/pi-repo-baby/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/k3-2o/pi-repo-baby?style=flat-square" /></a>
 </p>
 
 ---
@@ -66,7 +66,7 @@ On a real Terraform monorepo with 1,800 `.tf` files across 270 modules, `read_co
 ## Quick Start
 
 ```bash
-git clone https://github.com/k2-888/pi-repo-baby ~/.pi/agent/extensions/repo-baby
+git clone https://github.com/k3-2o/pi-repo-baby ~/.pi/agent/extensions/repo-baby
 ```
 
 That's it. The extension auto-installs `tree-sitter-language-pack` into its own `venv/` on first session. You'll see a toast notification during install, then it's silent forever. No `pip install`, no manual steps.
@@ -174,6 +174,11 @@ index.ts (TypeScript) ──pi.exec()──→ repo-baby.py --path <cwd> --token
 Inspired by [Aider's repo-map](https://aider.chat/docs/repomap.html) feature — the idea that an AI agent benefits from a ranked, deterministic structural overview of the codebase. Repo Baby reimagines it for Pi's tool-agency architecture, where the agent pulls the map on demand rather than having it pushed into every prompt.
 
 ---
+
+## License
+
+MIT
+
 
 ## License
 
