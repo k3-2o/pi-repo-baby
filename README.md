@@ -4,11 +4,6 @@
   </a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/k3-2o/pi-repo-baby/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/k3-2o/pi-repo-baby?style=flat-square" /></a>
-  <a href="https://github.com/k3-2o/pi-repo-baby/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/k3-2o/pi-repo-baby?style=flat-square" /></a>
-</p>
-
 ---
 
 # Repo Baby
