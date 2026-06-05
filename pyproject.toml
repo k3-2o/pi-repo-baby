@@ -1,0 +1,22 @@
+[project]
+name = "repo-baby"
+version = "3.0.0"
+description = "Codebase map — ranked symbols by cross-file importance"
+requires-python = ">=3.11"
+dependencies = [
+    "tree-sitter>=0.23",
+    "tree-sitter-language-pack>=0.13",
+]
+
+[project.scripts]
+repo-baby = "repo_baby:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 100

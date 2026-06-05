@@ -1,25 +1,10 @@
-# Python
-venv/
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
+*.pyc
+.ruff_cache/
+.venv/
+venv/
+src/*.egg-info/
+*.egg
 dist/
 build/
-*.egg
 
-# Node
-node_modules/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
