@@ -29,7 +29,18 @@ MAX_FILES_DEFAULT = 1000
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Repo Baby — codebase map generator")
+    ap = argparse.ArgumentParser(
+        description="Scope — codebase orientation tool",
+        epilog=(
+            "examples:\n"
+            "  scope --path . --mode overview        Project fingerprint\n"
+            "  scope --path . --mode map              Ranked symbols by importance\n"
+            "  scope --path . --mode pairs            Source-to-test file mapping\n"
+            "\n"
+            "docs: https://github.com/k3-2o/scope"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     ap.add_argument("--path", required=True, help="Path to repository root")
     ap.add_argument("--scope", default=".", help="Limit to a subdirectory (default: .)")
     ap.add_argument(
