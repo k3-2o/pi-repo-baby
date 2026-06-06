@@ -1,23 +1,30 @@
 ---
 name: scope
 description: "Codebase orientation for unfamiliar repos. Run when: you just entered a repo and cannot name the top 3 most important files; the user gave an open-ended task spanning multiple modules; you need to find test files for a source file; you renamed/moved a shared symbol and need to verify nothing broke. Trigger words: map, orient, explore, structure, unfamiliar, find tests, understand project."
-compatibility: "Requires `scope` CLI on PATH. Install: `cd ~/scope && uv tool install .`"
+compatibility: "Requires `scope` CLI on PATH. Install from github.com/k3-2o/scope."
 ---
 
 # Scope
 
 ## Setup
 
-Check the CLI is available:
+Check if scope is available:
 
 ```bash
 which scope
 ```
 
-If not found:
+If not found, ask the user: **"scope is not installed. Install it from github.com/k3-2o/scope?"**
+If they agree, clone and install:
+
 ```bash
-cd ~/scope  # or wherever the repo is cloned
-uv tool install .
+git clone https://github.com/k3-2o/scope ~/scope && cd ~/scope && uv tool install .
+```
+
+Then verify:
+
+```bash
+which scope
 ```
 
 ## Workflow
