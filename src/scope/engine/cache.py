@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from repo_baby.models import Symbol
+from scope.models import Symbol
 
 
 def cache_dir(repo_path: str) -> Path:
@@ -23,11 +23,11 @@ def _cache_path(repo_path: str, filename: str) -> Path:
 
 
 def cache_file(repo_path: str) -> Path:
-    return _cache_path(repo_path, "repo-baby-cache-v2.json")
+    return _cache_path(repo_path, "scope-cache-v2.json")
 
 
 def files_signature(repo_path: str, files: List[str]) -> str:
-    from repo_baby.engine.git import git_head
+    from scope.engine.git import git_head
 
     h = hashlib.sha256()
     h.update(git_head(repo_path).encode())
@@ -46,7 +46,7 @@ def files_signature(repo_path: str, files: List[str]) -> str:
 def load_cached_symbols(
     repo_path: str, files: List[str], scope: str, max_files: int
 ) -> Optional[Dict[str, List[Symbol]]]:
-    from repo_baby.engine.discover import normalize_scope
+    from scope.engine.discover import normalize_scope
 
     path = cache_file(repo_path)
     try:
@@ -65,7 +65,7 @@ def save_cached_symbols(
     repo_path: str, files: List[str], scope: str, max_files: int,
     all_symbols: Dict[str, List[Symbol]],
 ) -> None:
-    from repo_baby.engine.discover import normalize_scope
+    from scope.engine.discover import normalize_scope
 
     payload = {
         "version": 2,

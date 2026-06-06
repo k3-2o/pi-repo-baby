@@ -1,7 +1,7 @@
 [project]
-name = "repo-baby"
+name = "scope"
 version = "3.0.0"
-description = "Codebase map — ranked symbols by cross-file importance"
+description = "Codebase awareness CLI — ranked symbols by cross-file importance"
 requires-python = ">=3.11"
 dependencies = [
     "tree-sitter>=0.23",
@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-repo-baby = "repo_baby:main"
+scope = "scope:main"
 
 [build-system]
 requires = ["hatchling"]

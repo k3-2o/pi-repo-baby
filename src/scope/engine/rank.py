@@ -5,7 +5,7 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple
 
-from repo_baby.models import Symbol
+from scope.models import Symbol
 
 _IDENTIFIER_RE = re.compile(r"[a-zA-Z_]\w+")
 

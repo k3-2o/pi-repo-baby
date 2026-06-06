@@ -9,7 +9,7 @@ try:
 except ImportError:
     tomllib = None  # type: ignore[assignment]
 
-from repo_baby.engine.references import read_text
+from scope.engine.references import read_text
 
 
 def detect_frameworks(repo_path: str, files: List[str]) -> Dict[str, Any]:

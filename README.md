@@ -1,11 +1,11 @@
-# Repo Baby
+# Scope
 
 Codebase awareness CLI: ranked symbols by cross-file importance, project overview, and test/source pair mapping.
 
 ```bash
-repo-baby --path /some/repo --mode overview
-repo-baby --path /some/repo --mode map --token-budget 800
-repo-baby --path /some/repo --mode pairs
+scope --path /some/repo --mode overview
+scope --path /some/repo --mode map --token-budget 800
+scope --path /some/repo --mode pairs
 ```
 
 Designed for AI coding agents that need to orient themselves in an unfamiliar codebase. Three modes, each covering something bash cannot efficiently do alone.
@@ -14,11 +14,11 @@ Designed for AI coding agents that need to orient themselves in an unfamiliar co
 
 ```bash
 # Requires Python 3.11+ and uv
-cd ~/repo-baby
+cd scope  # or wherever you cloned it
 uv tool install .
 ```
 
-Then `repo-baby` is on your PATH permanently.
+Then `scope` is on your PATH permanently.
 
 ## Modes
 
@@ -60,11 +60,11 @@ The `← N files` shows how many other files reference each symbol.
 2. Parses with Tree-sitter (25+ languages: Python, JS, TS, Go, Rust, Java, Ruby, C/C++, PHP, Kotlin, Swift, Scala, Bash, SQL, Lua, HCL, and more)
 3. Extracts symbols with scope tracking (class.method prefixing)
 4. Ranks by cross-file token reference count
-5. Caches to `.git/repo-baby-cache-v2.json` (invalidated on file changes)
+5. Caches to `.git/scope-cache-v2.json` (invalidated on file changes)
 
 ## Pi Agent Skill
 
-A skill at `~/.pi/agent/skills/repo-baby/SKILL.md` teaches the agent when to call the tool and how to interpret output. See `docs/SKILL.md` for the source.
+A skill at `~/.pi/agent/skills/scope/SKILL.md` teaches the agent when to call the tool and how to interpret output. See `docs/SKILL.md` for the source.
 
 ## License
 

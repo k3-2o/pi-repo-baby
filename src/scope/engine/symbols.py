@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from repo_baby.models import Symbol
+from scope.models import Symbol
 
 _TS_PACK_AVAILABLE = False
 _PARSERS: Dict[str, "Parser"] = {}

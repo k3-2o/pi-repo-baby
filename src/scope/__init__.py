@@ -6,24 +6,24 @@ import os
 import sys
 from typing import Any, Dict
 
-from repo_baby.engine.cache import (
+from scope.engine.cache import (
     load_cached_symbols,
     save_cached_symbols,
 )
-from repo_baby.engine.discover import (
+from scope.engine.discover import (
     discover_files,
     language_stats,
     pair_tests,
     prioritize_files,
 )
-from repo_baby.engine.frameworks import detect_frameworks
-from repo_baby.engine.rank import compute_importance, suggested_reads
-from repo_baby.engine.references import dependency_graph
-from repo_baby.engine.symbols import extract_symbols, is_available as ts_available
-from repo_baby.models import Symbol
-from repo_baby.modes import map as map_mode
-from repo_baby.modes import overview as overview_mode
-from repo_baby.modes import pairs as pairs_mode
+from scope.engine.frameworks import detect_frameworks
+from scope.engine.rank import compute_importance, suggested_reads
+from scope.engine.references import dependency_graph
+from scope.engine.symbols import extract_symbols, is_available as ts_available
+from scope.models import Symbol
+from scope.modes import map as map_mode
+from scope.modes import overview as overview_mode
+from scope.modes import pairs as pairs_mode
 
 MAX_FILES_DEFAULT = 1000
 

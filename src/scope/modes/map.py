@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Set, Tuple
 
-from repo_baby.models import Symbol
+from scope.models import Symbol
 
 
 def render(all_symbols: Dict[str, List[Symbol]], token_budget: int) -> str:
