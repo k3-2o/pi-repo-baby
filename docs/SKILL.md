@@ -1,6 +1,6 @@
 ---
 name: scope
-description: "Codebase orientation for unfamiliar repos. Run when: you just entered a repo and cannot name the top 3 most important files; the user gave an open-ended task spanning multiple modules; you need to find test files for a source file; you renamed/moved a shared symbol and need to verify nothing broke. Trigger words: map, orient, explore, structure, unfamiliar, find tests, understand project."
+description: "Codebase exploration for unfamiliar repos — finds entry points, maps important symbols (functions/classes) across 25+ languages, and pairs source files with tests. Use when: dropped into a project you've never seen and need to find where to start, verifying your edits didn't break the structure, looking for test files that match a source file, or generating a compact codebase summary for an AI prompt. Not for: measuring code quality (use prism). Trigger words: orient, explore, codebase, navigate, unfamiliar, what's here, entry points, onboarding, map, overview."
 compatibility: "Requires `scope` CLI on PATH. Install from github.com/k3-2o/scope."
 ---
 
