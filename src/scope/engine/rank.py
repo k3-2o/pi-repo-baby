@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple
 
+from scope.engine.discover import is_test_file as _is_test_file
 from scope.models import Symbol
 
 _IDENTIFIER_RE = re.compile(r"[a-zA-Z_]\w+")
@@ -92,18 +93,6 @@ def compute_importance(
                 score *= 0.05
 
             sym.importance = score
-
-
-def _is_test_file(rel_path: str) -> bool:
-    p = rel_path.replace("\\", "/")
-    base = os.path.basename(p)
-    TEST_MARKERS = ("/test/", "/tests/", "/__tests__/", ".test.", ".spec.")
-    return (
-        any(marker in f"/{p}" for marker in TEST_MARKERS)
-        or base.startswith("test_")
-        or base.endswith("_test.py")
-        or base.endswith("_test.go")
-    )
 
 
 def suggested_reads(all_symbols: Dict[str, List[Symbol]], files: List[str], limit: int = 5) -> List[str]:

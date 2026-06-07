@@ -6,23 +6,12 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
+from scope.engine._utils import read_text
 from scope.engine.discover import SUPPORTED_EXTENSIONS
 
 IMPORT_RE = re.compile(r"(?:from\s+([\w\.\/\-@]+)\s+import|import\s+([\w\.\/\-@]+)|require\(['\"]([^'\"]+)['\"]\)|use\s+([\w:]+))")
 FROM_STRING_RE = re.compile(r"\bfrom\s+['\"]([^'\"]+)['\"]")
 SIDE_EFFECT_IMPORT_RE = re.compile(r"^import\s+['\"]([^'\"]+)['\"]")
-
-MAX_FILE_SIZE = 500_000
-
-
-def read_text(repo_path: str, rel_path: str, max_bytes: int = MAX_FILE_SIZE) -> str:
-    try:
-        full_path = Path(repo_path) / rel_path
-        if full_path.stat().st_size > max_bytes:
-            return ""
-        return full_path.read_text(encoding="utf-8", errors="ignore")
-    except OSError:
-        return ""
 
 
 def extract_imports(repo_path: str, rel_path: str) -> List[str]:
@@ -47,8 +36,18 @@ def extract_imports(repo_path: str, rel_path: str) -> List[str]:
             continue
         if ext == ".rs" and not stripped.startswith("use "):
             continue
-        if ext == ".go" and not (stripped.startswith("import ") or stripped.startswith('"')):
-            continue
+        if ext == ".go":
+            if not (stripped.startswith("import ") or stripped.startswith('"')):
+                continue
+            # Handle `import "fmt"` style
+            go_match = re.match(r'import\s+"([^"]+)"', stripped)
+            if go_match:
+                imports.add(go_match.group(1))
+                continue
+            # For grouped imports `"fmt"` on its own line
+            if stripped.startswith('"') and stripped.endswith('"'):
+                imports.add(stripped.strip('"'))
+                continue
         for match in IMPORT_RE.finditer(stripped):
             target = next((g for g in match.groups() if g), "")
             if target:

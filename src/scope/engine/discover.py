@@ -178,45 +178,43 @@ def prioritize_files(files: Iterable[str]) -> List[str]:
     return sorted(files, key=_file_priority)
 
 
-def _ext_to_lang() -> Dict[str, str]:
-    return {
-        ".py": "python",
-        ".js": "javascript",
-        ".ts": "typescript",
-        ".tsx": "tsx",
-        ".go": "go",
-        ".rs": "rust",
-        ".rb": "ruby",
-        ".java": "java",
-        ".c": "c",
-        ".h": "c",
-        ".cpp": "cpp",
-        ".cc": "cpp",
-        ".cxx": "cpp",
-        ".hpp": "cpp",
-        ".hxx": "cpp",
-        ".cs": "csharp",
-        ".php": "php",
-        ".kt": "kotlin",
-        ".kts": "kotlin",
-        ".swift": "swift",
-        ".scala": "scala",
-        ".sc": "scala",
-        ".sh": "bash",
-        ".bash": "bash",
-        ".sql": "sql",
-        ".lua": "lua",
-        ".tf": "hcl",
-        ".tfvars": "hcl",
-        ".hcl": "hcl",
-    }
+_EXT_TO_LANG: Dict[str, str] = {
+    ".py": "python",
+    ".js": "javascript",
+    ".ts": "typescript",
+    ".tsx": "tsx",
+    ".go": "go",
+    ".rs": "rust",
+    ".rb": "ruby",
+    ".java": "java",
+    ".c": "c",
+    ".h": "c",
+    ".cpp": "cpp",
+    ".cc": "cpp",
+    ".cxx": "cpp",
+    ".hpp": "cpp",
+    ".hxx": "cpp",
+    ".cs": "csharp",
+    ".php": "php",
+    ".kt": "kotlin",
+    ".kts": "kotlin",
+    ".swift": "swift",
+    ".scala": "scala",
+    ".sc": "scala",
+    ".sh": "bash",
+    ".bash": "bash",
+    ".sql": "sql",
+    ".lua": "lua",
+    ".tf": "hcl",
+    ".tfvars": "hcl",
+    ".hcl": "hcl",
+}
 
 
 def language_stats(files: Iterable[str]) -> Dict[str, int]:
-    etl = _ext_to_lang()
     stats: Dict[str, int] = {}
     for file_path in files:
-        lang = etl.get(Path(file_path).suffix, "other")
+        lang = _EXT_TO_LANG.get(Path(file_path).suffix, "other")
         stats[lang] = stats.get(lang, 0) + 1
     return dict(sorted(stats.items(), key=lambda item: (-item[1], item[0])))
 

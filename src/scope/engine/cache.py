@@ -4,7 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from scope.models import Symbol
 
@@ -80,9 +80,19 @@ def save_cached_symbols(
         pass
 
 
+_F = Any  # type alias for the transform callable
+
+
+def _symbols_transform(
+    data: Dict[str, List[Any]],
+    transform: Callable[[Any], Any],
+) -> Dict[str, List[Any]]:
+    return {fp: [transform(s) for s in syms] for fp, syms in data.items()}
+
+
 def _symbols_to_dict(all_symbols: Dict[str, List[Symbol]]) -> Dict[str, List[Dict[str, Any]]]:
-    return {fp: [s.to_dict() for s in syms] for fp, syms in all_symbols.items()}
+    return _symbols_transform(all_symbols, lambda s: s.to_dict())  # type: ignore[return-value]
 
 
 def _symbols_from_dict(data: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Symbol]]:
-    return {fp: [Symbol.from_dict(s) for s in syms] for fp, syms in data.items()}
+    return _symbols_transform(data, Symbol.from_dict)  # type: ignore[return-value]
